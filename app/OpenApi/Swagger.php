@@ -14,17 +14,7 @@ use OpenApi\Attributes as OA;
 )]
 class Swagger
 {
-    #[OA\Get(
-        path: '/',
-        summary: 'Landing page',
-        tags: ['System'],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: 'Application landing page'
-            ),
-        ]
-    )]
+
     public function welcome(): void
     {
     }
