@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Services\SlotService;
+use App\Services\SlotService;
 use Illuminate\Http\Request;
 
 class HoldController extends Controller

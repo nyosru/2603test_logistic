@@ -2,10 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Services\SlotService;
-use App\Http\Resources\SlotResource;
-use App\Models\Slot;
-use Illuminate\Http\Request;
+use App\Services\SlotService;
 
 class AvailabilityController extends Controller
 {
@@ -16,10 +13,9 @@ class AvailabilityController extends Controller
 
     public function availability()
     {
-        $slots = $this->slotService->getAvailability();
-
-        return $slots
-            ->map(fn (Slot $slot) => (new SlotResource($slot))->resolve())
-            ->values();
+        return response()->json(
+            $this->slotService->getAvailability()->values(),
+            200
+        );
     }
 }
