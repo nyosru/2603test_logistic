@@ -11,20 +11,6 @@
         }
     ],
     "paths": {
-        "/": {
-            "get": {
-                "tags": [
-                    "System"
-                ],
-                "summary": "Landing page",
-                "operationId": "7bd74326d04d19897389f433ba14e8e2",
-                "responses": {
-                    "200": {
-                        "description": "Application landing page"
-                    }
-                }
-            }
-        },
         "/slots/availability": {
             "get": {
                 "tags": [
@@ -339,10 +325,6 @@
         }
     },
     "tags": [
-        {
-            "name": "System",
-            "description": "System"
-        },
         {
             "name": "Slots",
             "description": "Slots"
