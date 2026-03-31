@@ -14,7 +14,7 @@ use Illuminate\Support\Collection;
 
 class SlotService
 {
-    private const AVAILABILITY_CACHE_KEY = 'slots.availability';
+    public $cache_key = 'slots.availability';
     private const AVAILABILITY_CACHE_TTL_SECONDS = 10;
     private object $missingValue;
 
@@ -26,15 +26,9 @@ class SlotService
     public function getAvailability(): Collection
     {
         return collect($this->getCachedValue(
-            self::AVAILABILITY_CACHE_KEY,
-            fn (): array => Slot::query()
-                ->orderBy('slot_id')
-                ->get()
-                ->map(fn (Slot $slot): array => [
-                    'slot_id' => (int) $slot->slot_id,
-                    'capacity' => (int) $slot->capacity,
-                    'remaining' => (int) $slot->remaining,
-                ])
+            $this->cache_key,
+            fn (): array => Slot::
+                orderBy('slot_id')
                 ->all(),
             self::AVAILABILITY_CACHE_TTL_SECONDS,
         ));
@@ -44,13 +38,13 @@ class SlotService
     {
         return DB::transaction(function () use ($slotId, $uuid) {
 
-            $existingHold = Hold::query()
-                ->where('UUID', $uuid)
+            $existingHold = Hold::where('UUID', $uuid)
                 ->first();
 
             if ($existingHold) {
                 return [
                     'status' => 200,
+                    'cached' => true,
                     'data' => $this->mapHoldResponse($existingHold),
                 ];
             }
@@ -66,6 +60,7 @@ class SlotService
                 ];
             }
 
+            // все места в слоте уже заняты ?
             if ((int) $slot->capacity === (int) $slot->remaining ) {
                 return [
                     'status' => 409,
@@ -76,20 +71,20 @@ class SlotService
             $atHold = now()->addMinutes(5);
 
             try {
-                $hold = Hold::query()->create([
+                $hold = Hold::create([
                     'to_slot' => $slotId,
                     'at_end' => $atHold,
                     'UUID' => $uuid,
                     'status' => 'held',
                 ]);
             } catch (QueryException $ex) {
-                $duplicate = Hold::query()
-                    ->where('UUID', $uuid)
+                $duplicate = Hold::where('UUID', $uuid)
                     ->first();
 
                 if ($duplicate) {
                     return [
                         'status' => 200,
+                        'cached' => true,
                         'data' => $this->mapHoldResponse($duplicate),
                     ];
                 }
@@ -102,6 +97,7 @@ class SlotService
 
             return [
                 'status' => 200,
+                'cached' => false,
                 'data' => $this->mapHoldResponse($hold),
             ];
         });
@@ -163,10 +159,10 @@ class SlotService
             $hold->slot->decrement('remaining');
             $hold->status = 'confirmed';
             $hold->save();
-            $this->invalidateAvailabilityCache();
 
             return [
                 'status' => 200,
+                'cached' => false,
                 'data' => $this->mapHoldResponse($hold),
             ];
         });
@@ -191,18 +187,19 @@ class SlotService
             $hold->slot->decrement('remaining');
             $hold->status = 'cancelled';
             $hold->save();
-            $this->invalidateAvailabilityCache();
 
             return [
                 'status' => 200,
+                'cached' => false,
                 'data' => $this->mapHoldResponse($hold),
             ];
         });
     }
 
+
     public function invalidateAvailabilityCache(): void
     {
-        Cache::forget(self::AVAILABILITY_CACHE_KEY);
+        Cache::forget($this->cache_key);
     }
 
     private function mapHoldResponse(Hold $hold): array
@@ -225,6 +222,7 @@ class SlotService
         int $waitAttempts = 5,
         int $waitMs = 100
     ): mixed {
+
         $cached = Cache::get($key, $this->missingValue);
         if ($cached !== $this->missingValue) {
             return $cached;

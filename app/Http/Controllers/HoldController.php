@@ -20,6 +20,11 @@ class HoldController extends Controller
 
         $result = $this->slotService->createHold($id, (int) $validated['UUID']);
 
+        // если ответ не кешированный, значит изменили бд, забыаем кеш
+        if( isset($result['cached']) && $result['cached'] === false ){
+            $this->slotService->invalidateAvailabilityCache();
+        }
+
         return response()->json($result['data'], $result['status']);
     }
 
@@ -35,12 +40,22 @@ class HoldController extends Controller
     {
         $result = $this->slotService->confirmHold($id);
 
+        // если ответ не кешированный, значит изменили бд, забыаем кеш
+        if( isset($result['cached']) && $result['cached'] === false ){
+            $this->slotService->invalidateAvailabilityCache();
+        }
+
         return response()->json($result['data'], $result['status']);
     }
 
     public function destroy(int $id)
     {
         $result = $this->slotService->cancelHold($id);
+
+        // если ответ не кешированный, значит изменили бд, забыаем кеш
+        if( isset($result['cached']) && $result['cached'] === false ){
+            $this->slotService->invalidateAvailabilityCache();
+        }
 
         return response()->json($result['data'], $result['status']);
     }
