@@ -1,4 +1,7 @@
 go:
+	cp .env.example .env
+	make migrate
+	make swagger
 	php artisan serve --host=0.0.0.0 --port=8000
 
 migrate:
