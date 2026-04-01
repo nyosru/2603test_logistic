@@ -15,18 +15,18 @@ class SlotSeeder extends Seeder
         DB::table('slot')->insert([
             [
                 'slot_id' => 1,
-                'capacity' => rand(5,15),
+                'capacity' => rand(10,15),
                 'remaining' => 10,
             ],
             [
                 'slot_id' => 2,
                 'capacity' => 15,
-                'remaining' => 7,
+                'remaining' => 2,
             ],
             [
                 'slot_id' => 3,
                 'capacity' => 20,
-                'remaining' => 0,
+                'remaining' => 10,
             ],
         ]);
     }

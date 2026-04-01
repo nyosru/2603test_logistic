@@ -29,6 +29,7 @@ class SlotService
             $this->cache_key,
             fn (): array => Slot::
                 orderBy('slot_id')
+                ->get()
                 ->all(),
             self::AVAILABILITY_CACHE_TTL_SECONDS,
         ));
@@ -60,8 +61,8 @@ class SlotService
                 ];
             }
 
-            // все места в слоте уже заняты ?
-            if ((int) $slot->capacity === (int) $slot->remaining ) {
+            // если нет более свободных remaining мест то ошибка
+            if ( (int) $slot->remaining === 0) {
                 return [
                     'status' => 409,
                     'data' => ['message' => 'Slot has no remaining capacity'],
@@ -92,8 +93,7 @@ class SlotService
                 return ['data' => [], 'status' => 404, 'error' => true];
             }
 
-            $slot->increment('remaining');
-            $this->invalidateAvailabilityCache();
+            $hold->slot->decrement('remaining');
 
             return [
                 'status' => 200,
@@ -147,16 +147,7 @@ class SlotService
                 ];
             }
 
-            $remaining = $hold->slot->remaining;
-
-            if ($remaining == 0) {
-                return [
-                    'status' => 409,
-                    'data' => ['message' => 'Slot has no remaining capacity'],
-                ];
-            }
-
-            $hold->slot->decrement('remaining');
+            $hold->slot->increment('remaining');
             $hold->status = 'confirmed';
             $hold->save();
 
