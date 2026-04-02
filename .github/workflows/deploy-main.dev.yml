@@ -101,7 +101,7 @@ jobs:
 
   sms_end:
     runs-on: ubuntu-latest
-    needs: deploy2
+    needs: deploy
     steps:
 #      - name: Send deployment success notification
 #        uses: appleboy/telegram-action@master
