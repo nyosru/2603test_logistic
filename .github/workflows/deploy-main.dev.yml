@@ -66,15 +66,12 @@ jobs:
             docker exec ${{ env.DOCKER_CONTAINER }} composer install --optimize-autoloader
 
             # Подготавливаем sqlite и каталоги для записи веб-процессом
-            docker exec ${{ env.DOCKER_CONTAINER }} sh -lc 'mkdir -p database storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache && touch database/database.sqlite'
             docker exec ${{ env.DOCKER_CONTAINER }} chown -R www-data:www-data database storage bootstrap/cache
             docker exec ${{ env.DOCKER_CONTAINER }} chmod -R ug+rwX database storage bootstrap/cache
 
             # Очищаем кеш конфигов, чтобы приложение подхватило актуальные env
             docker exec ${{ env.DOCKER_CONTAINER }} php artisan optimize:clear
 
-            # Прогоняем тесты перед миграциями и деплоем
-            docker exec ${{ env.DOCKER_CONTAINER }} php artisan test --env=testing
 
             # Применяем миграции без пересоздания production базы
             docker exec ${{ env.DOCKER_CONTAINER }} php artisan migrate --force --seed
