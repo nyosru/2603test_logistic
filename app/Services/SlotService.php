@@ -46,7 +46,7 @@ class SlotService
                 return [
                     'status' => 200,
                     'cached' => true,
-                    'data' => $this->mapHoldResponse($existingHold),
+                    'data' => $this->mapHoldResponse($existingHold, true),
                 ];
             }
 
@@ -86,7 +86,7 @@ class SlotService
                     return [
                         'status' => 200,
                         'cached' => true,
-                        'data' => $this->mapHoldResponse($duplicate),
+                        'data' => $this->mapHoldResponse($duplicate, true),
                     ];
                 }
 
@@ -193,7 +193,7 @@ class SlotService
         Cache::forget($this->cache_key);
     }
 
-    private function mapHoldResponse(Hold $hold): array
+    private function mapHoldResponse(Hold $hold, $result_from_cache = false ): array
     {
         return [
             'message' => 'ok',
@@ -202,6 +202,7 @@ class SlotService
             'expires_at' => $hold->at_end instanceof CarbonInterface
                 ? $hold->at_end->toISOString()
                 : (string) $hold->at_end,
+            'result_from_cache' => $result_from_cache
         ];
     }
 
