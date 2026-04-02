@@ -69,37 +69,35 @@ jobs:
             docker exec ${{ env.DOCKER_CONTAINER }} php artisan migrate:fresh --seed
 
             # Сборка свагера
-            docker exec ${{ env.DOCKER_CONTAINER }} make s
+            # docker exec ${{ env.DOCKER_CONTAINER }} make s
 
 
 
-  deploy2:
-    runs-on: ubuntu-latest
-
-    needs: deploy
-
-    steps:
-      - name: Setup SSH known hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ env.VPS_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Deploy code to VPS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ env.VPS_HOST }}
-          username: ${{ env.VPS_USERNAME }}
-          key: ${{ secrets.DEPLOY_KEY_DOCKER24 }}
-          script: |
-            set -e  # Выход при ошибке
-
-
-            # docker exec ${{ env.DOCKER_CONTAINER }} npm install
-            # docker exec ${{ env.DOCKER_CONTAINER }} npm run build
-
-            # Очистка кеша
-            docker exec ${{ env.DOCKER_CONTAINER }} php artisan optimize:clear
-            docker exec ${{ env.DOCKER_CONTAINER }} php artisan optimize
+#  deploy2:
+#    runs-on: ubuntu-latest
+#
+#    needs: deploy
+#
+#    steps:
+#      - name: Setup SSH known hosts
+#        run: |
+#          mkdir -p ~/.ssh
+#          ssh-keyscan -H ${{ env.VPS_HOST }} >> ~/.ssh/known_hosts
+#
+#      - name: Deploy code to VPS
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ env.VPS_HOST }}
+#          username: ${{ env.VPS_USERNAME }}
+#          key: ${{ secrets.DEPLOY_KEY_DOCKER24 }}
+#          script: |
+#            set -e  # Выход при ошибке
+#      #             docker exec ${{ env.DOCKER_CONTAINER }} npm install
+#      #             docker exec ${{ env.DOCKER_CONTAINER }} npm run build
+#
+#            # Очистка кеша
+#            docker exec ${{ env.DOCKER_CONTAINER }} php artisan optimize:clear
+#            docker exec ${{ env.DOCKER_CONTAINER }} php artisan optimize
 
   sms_end:
     runs-on: ubuntu-latest
