@@ -66,19 +66,17 @@ jobs:
             docker exec ${{ env.DOCKER_CONTAINER }} composer install --optimize-autoloader
 
             # Подготавливаем sqlite и каталоги для записи веб-процессом
-            docker exec ${{ env.DOCKER_CONTAINER }} chown -R www-data:www-data database storage bootstrap/cache
-            docker exec ${{ env.DOCKER_CONTAINER }} chmod -R ug+rwX database storage bootstrap/cache
+            docker exec ${{ env.DOCKER_CONTAINER }} chown -R www-data:www-data  storage bootstrap/cache
+            docker exec ${{ env.DOCKER_CONTAINER }} chmod -R ug+rwX storage bootstrap/cache
 
             # Очищаем кеш конфигов, чтобы приложение подхватило актуальные env
             docker exec ${{ env.DOCKER_CONTAINER }} php artisan optimize:clear
 
-
             # Применяем миграции без пересоздания production базы
-            docker exec ${{ env.DOCKER_CONTAINER }} php artisan migrate --force --seed
+            docker exec ${{ env.DOCKER_CONTAINER }} php artisan migrate:fresh --force --seed
 
-            # Сборка свагера
-            # docker exec ${{ env.DOCKER_CONTAINER }} make s
-
+            docker exec ${{ env.DOCKER_CONTAINER }} chown -R www-data:www-data database
+            docker exec ${{ env.DOCKER_CONTAINER }} chmod -R 755 database
 
 
 #  deploy2:
