@@ -67,7 +67,8 @@ jobs:
 
             # Миграции
             docker exec ${{ env.DOCKER_CONTAINER }} chmod -R 777 database/database.sqlite
-            docker exec ${{ env.DOCKER_CONTAINER }} chown -R www-data:www-data database/database.sqlite
+            # docker exec ${{ env.DOCKER_CONTAINER }} chown -R www-data:www-data database/database.sqlite
+            docker exec ${{ env.DOCKER_CONTAINER }} chown -R root:root database/database.sqlite
             docker exec ${{ env.DOCKER_CONTAINER }} php artisan migrate:fresh --seed
 
             # Сборка свагера
